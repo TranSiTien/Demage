@@ -67,7 +67,7 @@ describe("token-2022-staking", () => {
     mint: stakeMintKeypair.publicKey,
     name: "GEM - Grimoire of Eternal Magic",
     symbol: "GEM",
-    uri: "https://raw.githubusercontent.com/TranSiTien/Demage/on-chain/assets/logo.png",
+    uri: "https://raw.githubusercontent.com/TranSiTien/Demage/main/assets/token-info.json",
     additionalMetadata: [],
   };
 
