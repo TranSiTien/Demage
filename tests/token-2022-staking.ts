@@ -52,9 +52,9 @@ describe("token-2022-staking", () => {
   );
 
   // create a new mint for reward token
-  const rewardMintKeypair = anchor.web3.Keypair.generate();
+  const rewardMintKeypair = loadKeypairFromFile("./target/deploy/reward-mint-keypair.json");
   // create a new mint for stake token
-  const stakeMintKeypair = anchor.web3.Keypair.generate();
+  const stakeMintKeypair = loadKeypairFromFile("./target/deploy/stake-mint-keypair.json");;
 
   function loadMetadataFromFile(filePath: string): TokenMetadata {
     const metadataJson = fs.readFileSync(filePath, 'utf-8');
@@ -174,6 +174,7 @@ describe("token-2022-staking", () => {
           mintAuthority: staker.publicKey,
           updateAuthority: staker.publicKey,
         }),
+        
         createAssociatedTokenAccountInstruction(
           staker.publicKey,
           stakerTokenAccount,
@@ -181,6 +182,7 @@ describe("token-2022-staking", () => {
           stakeMintKeypair.publicKey,
           TOKEN_2022_PROGRAM_ID
         ),
+
         createMintToCheckedInstruction(
           stakeMintKeypair.publicKey,
           stakerTokenAccount,
@@ -219,166 +221,166 @@ describe("token-2022-staking", () => {
     assert(configAccount.authority.equals(provider.publicKey));
   });
 
-  // it("Should create a new pool", async () => {
-  //   const tx = await program.methods
-  //     .createPool(
-  //       new anchor.BN(1000 * anchor.web3.LAMPORTS_PER_SOL),
-  //       rewardPerSlot
-  //     )
-  //     .accounts({
-  //       signer: provider.publicKey,
-  //       rewardTokenProgram: TOKEN_2022_PROGRAM_ID,
-  //       stakeTokenProgram: TOKEN_2022_PROGRAM_ID,
-  //       rewardMint: rewardMintKeypair.publicKey,
-  //       stakeMint: stakeMintKeypair.publicKey,
-  //     })
-  //     .rpc();
-  //   console.log("Your transaction signature", tx);
+  it("Should create a new pool", async () => {
+    const tx = await program.methods
+      .createPool(
+        new anchor.BN(1000 * anchor.web3.LAMPORTS_PER_SOL),
+        rewardPerSlot
+      )
+      .accounts({
+        signer: provider.publicKey,
+        rewardTokenProgram: TOKEN_2022_PROGRAM_ID,
+        stakeTokenProgram: TOKEN_2022_PROGRAM_ID,
+        rewardMint: rewardMintKeypair.publicKey,
+        stakeMint: stakeMintKeypair.publicKey,
+      })
+      .rpc();
+    console.log("Your transaction signature", tx);
 
-  //   const poolAccount = await program.account.pool.fetch(pool);
-  //   assert(poolAccount.rewardMint.equals(rewardMintKeypair.publicKey));
-  //   assert(poolAccount.stakeMint.equals(stakeMintKeypair.publicKey));
-  //   assert(poolAccount.rewardPerSlot.eq(rewardPerSlot));
-  //   assert(
-  //     poolAccount.allocation.eq(
-  //       new anchor.BN(1000 * anchor.web3.LAMPORTS_PER_SOL)
-  //     )
-  //   );
+    const poolAccount = await program.account.pool.fetch(pool);
+    assert(poolAccount.rewardMint.equals(rewardMintKeypair.publicKey));
+    assert(poolAccount.stakeMint.equals(stakeMintKeypair.publicKey));
+    assert(poolAccount.rewardPerSlot.eq(rewardPerSlot));
+    assert(
+      poolAccount.allocation.eq(
+        new anchor.BN(1000 * anchor.web3.LAMPORTS_PER_SOL)
+      )
+    );
 
-  //   const rewardAtaAccount = await getAccount(
-  //     provider.connection,
-  //     rewardAta,
-  //     null,
-  //     TOKEN_2022_PROGRAM_ID
-  //   );
+    const rewardAtaAccount = await getAccount(
+      provider.connection,
+      rewardAta,
+      null,
+      TOKEN_2022_PROGRAM_ID
+    );
 
-  //   assert(
-  //     new anchor.BN(rewardAtaAccount.amount.toString()).eq(
-  //       new anchor.BN(1000 * anchor.web3.LAMPORTS_PER_SOL)
-  //     )
-  //   );
-  // });
+    assert(
+      new anchor.BN(rewardAtaAccount.amount.toString()).eq(
+        new anchor.BN(1000 * anchor.web3.LAMPORTS_PER_SOL)
+      )
+    );
+  });
 
-  // it("Should stake successfully", async () => {
-  //   const tx = await program.methods
-  //     .stake(stakeAmount)
-  //     .accounts({
-  //       signer: staker.publicKey,
-  //       stakeTokenProgram: TOKEN_2022_PROGRAM_ID,
-  //       pool,
-  //     })
-  //     .signers([staker])
-  //     .rpc();
+  it("Should stake successfully", async () => {
+    const tx = await program.methods
+      .stake(stakeAmount)
+      .accounts({
+        signer: staker.publicKey,
+        stakeTokenProgram: TOKEN_2022_PROGRAM_ID,
+        pool,
+      })
+      .signers([staker])
+      .rpc();
 
-  //   console.log("Your transaction signature", tx);
+    console.log("Your transaction signature", tx);
 
-  //   const stakeInfoAccount = await program.account.stakeInfo.fetch(stakeInfo);
+    const stakeInfoAccount = await program.account.stakeInfo.fetch(stakeInfo);
 
-  //   assert(stakeInfoAccount.amount.eq(stakeAmount));
-  //   assert(stakeInfoAccount.reward.eq(new anchor.BN(0)));
+    assert(stakeInfoAccount.amount.eq(stakeAmount));
+    assert(stakeInfoAccount.reward.eq(new anchor.BN(0)));
 
-  //   const stakeInfoAtaAccount = await getAccount(
-  //     provider.connection,
-  //     stakeInfoAta,
-  //     null,
-  //     TOKEN_2022_PROGRAM_ID
-  //   );
+    const stakeInfoAtaAccount = await getAccount(
+      provider.connection,
+      stakeInfoAta,
+      null,
+      TOKEN_2022_PROGRAM_ID
+    );
 
-  //   assert(
-  //     new anchor.BN(stakeInfoAtaAccount.amount.toString()).eq(stakeAmount)
-  //   );
-  // });
+    assert(
+      new anchor.BN(stakeInfoAtaAccount.amount.toString()).eq(stakeAmount)
+    );
+  });
 
-  // it("Should unstake successfully", async () => {
-  //   const tx = await program.methods
-  //     .unstake(unstakeAmount)
-  //     .accountsPartial({
-  //       rewardMint: rewardMintKeypair.publicKey,
-  //       rewardTokenProgram: TOKEN_2022_PROGRAM_ID,
-  //       stakeTokenProgram: TOKEN_2022_PROGRAM_ID,
-  //       signer: staker.publicKey,
-  //       stakeMint: stakeMintKeypair.publicKey,
-  //     })
-  //     .signers([staker])
-  //     .rpc();
+  it("Should unstake successfully", async () => {
+    const tx = await program.methods
+      .unstake(unstakeAmount)
+      .accountsPartial({
+        rewardMint: rewardMintKeypair.publicKey,
+        rewardTokenProgram: TOKEN_2022_PROGRAM_ID,
+        stakeTokenProgram: TOKEN_2022_PROGRAM_ID,
+        signer: staker.publicKey,
+        stakeMint: stakeMintKeypair.publicKey,
+      })
+      .signers([staker])
+      .rpc();
 
-  //   console.log("Your transaction signature", tx);
+    console.log("Your transaction signature", tx);
 
-  //   const stakeInfoAccount = await program.account.stakeInfo.fetch(stakeInfo);
+    const stakeInfoAccount = await program.account.stakeInfo.fetch(stakeInfo);
 
-  //   assert(
-  //     stakeInfoAccount.amount.eq(
-  //       new anchor.BN(stakeAmount.toString()).sub(unstakeAmount)
-  //     )
-  //   );
+    assert(
+      stakeInfoAccount.amount.eq(
+        new anchor.BN(stakeAmount.toString()).sub(unstakeAmount)
+      )
+    );
 
-  //   assert(stakeInfoAccount.reward.eq(new anchor.BN(0)));
+    assert(stakeInfoAccount.reward.eq(new anchor.BN(0)));
 
-  //   const stakerRewardAta = getAssociatedTokenAddressSync(
-  //     rewardMintKeypair.publicKey,
-  //     staker.publicKey,
-  //     false,
-  //     TOKEN_2022_PROGRAM_ID
-  //   );
+    const stakerRewardAta = getAssociatedTokenAddressSync(
+      rewardMintKeypair.publicKey,
+      staker.publicKey,
+      false,
+      TOKEN_2022_PROGRAM_ID
+    );
 
-  //   const stakerRewardAtaAccount = await getAccount(
-  //     provider.connection,
-  //     stakerRewardAta,
-  //     null,
-  //     TOKEN_2022_PROGRAM_ID
-  //   );
+    const stakerRewardAtaAccount = await getAccount(
+      provider.connection,
+      stakerRewardAta,
+      null,
+      TOKEN_2022_PROGRAM_ID
+    );
 
 
-  //   console.log("stakerRewardAtaAccount.amount.toString()", stakerRewardAtaAccount.amount.toString());
-  //   assert(
-  //     new anchor.BN(stakerRewardAtaAccount.amount.toString()).gt(
-  //       new anchor.BN(0)
-  //     )
-  //   );
-  // });
+    console.log("stakerRewardAtaAccount.amount.toString()", stakerRewardAtaAccount.amount.toString());
+    assert(
+      new anchor.BN(stakerRewardAtaAccount.amount.toString()).gt(
+        new anchor.BN(0)
+      )
+    );
+  });
 
-  // it("Should close stake_info when unstake all", async () => {
-  //   const tx = await program.methods
-  //     .unstake(unstakeAmount)
-  //     .accountsPartial({
-  //       rewardMint: rewardMintKeypair.publicKey,
-  //       rewardTokenProgram: TOKEN_2022_PROGRAM_ID,
-  //       stakeTokenProgram: TOKEN_2022_PROGRAM_ID,
-  //       signer: staker.publicKey,
-  //       stakeMint: stakeMintKeypair.publicKey,
-  //     })
-  //     .signers([staker])
-  //     .rpc();
+  it("Should close stake_info when unstake all", async () => {
+    const tx = await program.methods
+      .unstake(unstakeAmount)
+      .accountsPartial({
+        rewardMint: rewardMintKeypair.publicKey,
+        rewardTokenProgram: TOKEN_2022_PROGRAM_ID,
+        stakeTokenProgram: TOKEN_2022_PROGRAM_ID,
+        signer: staker.publicKey,
+        stakeMint: stakeMintKeypair.publicKey,
+      })
+      .signers([staker])
+      .rpc();
 
-  //   console.log("Your transaction signature", tx);
-  //   try {
-  //     await program.account.stakeInfo.fetch(stakeInfo);
-  //     assert.ok(false);
-  //   } catch (error) {
-  //     // assert.isTrue(error instanceof AnchorError);
-  //     // const err: AnchorError = error;
-  //     // console.log("Error message: ", err);
-  //     assert(error);
-  //   }
+    console.log("Your transaction signature", tx);
+    try {
+      await program.account.stakeInfo.fetch(stakeInfo);
+      assert.ok(false);
+    } catch (error) {
+      // assert.isTrue(error instanceof AnchorError);
+      // const err: AnchorError = error;
+      // console.log("Error message: ", err);
+      assert(error);
+    }
 
-  //   const stakerRewardAta = getAssociatedTokenAddressSync(
-  //     rewardMintKeypair.publicKey,
-  //     staker.publicKey,
-  //     false,
-  //     TOKEN_2022_PROGRAM_ID
-  //   );
+    const stakerRewardAta = getAssociatedTokenAddressSync(
+      rewardMintKeypair.publicKey,
+      staker.publicKey,
+      false,
+      TOKEN_2022_PROGRAM_ID
+    );
 
-  //   const stakerRewardAtaAccount = await getAccount(
-  //     provider.connection,
-  //     stakerRewardAta,
-  //     null,
-  //     TOKEN_2022_PROGRAM_ID
-  //   );
+    const stakerRewardAtaAccount = await getAccount(
+      provider.connection,
+      stakerRewardAta,
+      null,
+      TOKEN_2022_PROGRAM_ID
+    );
 
-  // assert(
-  //   new anchor.BN(stakerRewardAtaAccount.amount.toString()).gt(
-  //       new anchor.BN(0)
-  //     )
-  //   );
-  // });
+  assert(
+    new anchor.BN(stakerRewardAtaAccount.amount.toString()).gt(
+        new anchor.BN(0)
+      )
+    );
+  });
 });

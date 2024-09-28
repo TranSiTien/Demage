@@ -9,7 +9,7 @@ pub use constants::*;
 pub use instructions::*;
 pub use state::*;
 
-declare_id!("6774icPr7QYZEVhZCDWaWh14raHt1zkjHb4ktBt8j2Cf");
+declare_id!("9aBmrECEDQVeVLSkk62tDZJmhTbvEyLY1AAQJ5GdhXha");
 
 #[program]
 pub mod token_2022_staking {
