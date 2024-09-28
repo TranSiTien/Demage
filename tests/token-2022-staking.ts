@@ -54,7 +54,7 @@ describe("token-2022-staking", () => {
   // create a new mint for reward token
   const rewardMintKeypair = loadKeypairFromFile("./target/deploy/reward-mint-keypair.json");
   // create a new mint for stake token
-  const stakeMintKeypair = loadKeypairFromFile("./target/deploy/stake-mint-keypair.json");;
+  const stakeMintKeypair = loadKeypairFromFile("./target/deploy/stake-mint-keypair.json");
 
   function loadMetadataFromFile(filePath: string): TokenMetadata {
     const metadataJson = fs.readFileSync(filePath, 'utf-8');
@@ -73,7 +73,7 @@ describe("token-2022-staking", () => {
 
   // create staker account
   console.log(metadata);
-  const staker = anchor.web3.Keypair.generate();
+  const staker = loadKeypairFromFile("./target/deploy/staker-mint-keypair.json");
   console.log("Staker address: ", staker.publicKey.toBase58());
   const rewardPerSlot = new anchor.BN(1_000_000_000);
 
